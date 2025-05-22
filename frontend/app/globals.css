@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'D-DIN', sans-serif;
+    background-color: #0f0f0f; /* Ashy black */
+    color: white;
+  }
+}
+
+@font-face {
+  font-family: 'D-DIN';
+  src: url('/fonts/D-DIN.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+@layer utilities {
+  .animate-enter {
+    animation: fadeInUp 0.4s ease-out forwards;
+  }
+
+  .animate-leave {
+    animation: fadeOutDown 0.3s ease-in forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) translateX(-50%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) translateX(-50%);
+    }
+  }
+
+  @keyframes fadeOutDown {
+    from {
+      opacity: 1;
+      transform: translateY(0) translateX(-50%);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(20px) translateX(-50%);
+    }
+  }
+}
+/* Manga-style speech bubble tail */
+.speech-bubble {
+  position: relative;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  border-width: 0 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent #111 transparent;
+}
