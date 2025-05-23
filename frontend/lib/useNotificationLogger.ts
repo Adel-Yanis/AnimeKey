@@ -1,3 +1,5 @@
+// frontend/lib/useNotificationLogger.ts
+
 'use client'
 
 import { logNotification } from './notifications'
@@ -8,7 +10,7 @@ export default function useNotificationLogger() {
     message: string,
     url: string,
     icon: string
-  ) => {
+  ): void => {
     logNotification(type, message, url, icon)
   }
 

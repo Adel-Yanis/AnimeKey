@@ -1,3 +1,5 @@
+// frontend/app/api/sanity-webhook/route.ts
+
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -9,7 +11,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing type' }, { status: 400 })
   }
 
-  const typeToNotify = {
+  // Define allowed types
+  const typeToNotify: Record<string, string> = {
     blogPost: 'notifyBlogPost',
     loreEntry: 'notifyLorePost',
     spotlight: 'notifySpotlight',
@@ -23,7 +26,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: `No handler for type ${_type}` }, { status: 200 })
   }
 
-  // Build local notification format
+  // Format local notification
   const notification = {
     id: Date.now().toString(),
     type: _type,
@@ -31,10 +34,10 @@ export async function POST(req: Request) {
     url: `/${_type === 'blogPost' ? 'blog' : _type}/${slug.current}`,
     timestamp: new Date().toLocaleString(),
     read: false,
-    icon: '🆕',
+    icon: '📰',
   }
 
-  // Store it temporarily (for localStorage based testing)
+  // Store it temporarily in localStorage (works for dev/debug only)
   const existing = JSON.parse(localStorage.getItem('animekey-notifications') || '[]')
   localStorage.setItem('animekey-notifications', JSON.stringify([notification, ...existing]))
 

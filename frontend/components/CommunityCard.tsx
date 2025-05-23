@@ -3,7 +3,16 @@
 
 import Link from 'next/link'
 
-export default function CommunityCard({ post }: { post: any }) {
+type CommunityPost = {
+  title: string
+  slug: {
+    current: string
+  }
+  username: string
+  type: string
+}
+
+export default function CommunityCard({ post }: { post: CommunityPost }) {
   return (
     <Link href={`/community/${post.slug.current}`}>
       <div className="bg-zinc-900 border border-animekey-green rounded-lg overflow-hidden hover:shadow-lg transition">

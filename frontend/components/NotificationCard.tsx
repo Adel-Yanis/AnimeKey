@@ -1,27 +1,27 @@
-'use client'
+// frontend/components/NotificationCard.tsx
+'use client';
 
-import Link from 'next/link'
+import Link from 'next/link';
 
 type NotificationCardProps = {
   message: string;
   url: string;
   timestamp: string;
   read: boolean;
-  icon?: string; // <-- mark as optional
-}
-
+  icon?: string; // Optional icon
+};
 
 export default function NotificationCard({
   message,
   url,
   timestamp,
   read,
-  icon,
+  icon = '🔔', // Default icon if none provided
 }: NotificationCardProps) {
   return (
     <Link href={url}>
       <div
-        className={`border border-animekey-green p-4 rounded-lg mb-4 hover:bg-[#1a1a1a] transition duration-150 ${
+        className={`border border-animekey-green p-4 rounded-lg mb-4 transition duration-150 ${
           read ? 'opacity-60' : 'opacity-100'
         }`}
       >
@@ -34,5 +34,5 @@ export default function NotificationCard({
         </div>
       </div>
     </Link>
-  )
+  );
 }

@@ -1,10 +1,14 @@
+// frontend/lib/toast.tsx
+
 'use client'
 
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { logNotification } from '@/lib/notifications'
+import { logNotification } from './notifications'
 
 export const showNewEventToast = () => {
+  logNotification('event', '📢 A new event has just been published! Don’t miss it!', '/events')
+
   toast.custom((t) => (
     <div
       className={`bg-[#111] text-white border border-animekey-green rounded-lg p-5 w-[90%] max-w-md mx-auto shadow-xl
@@ -16,11 +20,11 @@ export const showNewEventToast = () => {
         onClick={() => toast.dismiss(t.id)}
         className="absolute top-2 right-3 text-gray-400 hover:text-white text-lg"
       >
-        ✕
+        ×
       </button>
 
       {/* Title and Text */}
-      <h3 className="text-xl font-bold text-animekey-green">🎉 New Event!</h3>
+      <h3 className="text-xl font-bold text-animekey-green">📢 New Event!</h3>
       <p className="text-sm text-gray-300">
         A new event has just been published. Don’t miss it!
       </p>
@@ -33,7 +37,4 @@ export const showNewEventToast = () => {
       </Link>
     </div>
   ), { duration: Infinity })
-
-  // ✅ Log after showing
-  logNotification('event', '🎉 A new event has just been published! Don’t miss it!', '/events')
 }

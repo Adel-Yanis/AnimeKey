@@ -1,7 +1,7 @@
 'use client'
 
 import { Toaster } from 'react-hot-toast'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '../components/Sidebar'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (

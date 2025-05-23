@@ -1,65 +1,61 @@
-// frontend/app/blog/[slug]/page.tsx
-import { sanityClient } from '@/lib/sanity.client'
-import { groq } from 'next-sanity'
-import Image from 'next/image'
-import { PortableText } from '@portabletext/react'
-import { notFound } from 'next/navigation'
-import NotificationTrigger from '@/components/NotificationTrigger'
+// app/blog/[slug]/page.tsx
+import React from 'react';
+import { groq } from 'next-sanity';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
 
-type Props = {
-  params: {
-    slug: string
-  }
-}
+import { client } from '../../../lib/sanity.client';
+import { BlogPost } from '../../../lib/types';
+import UserActivityTracker from '../../../components/UserActivityTracker';
 
 const query = groq`
   *[_type == "blogPost" && slug.current == $slug][0] {
+    _id,
     title,
     slug,
-    publishedAt,
     excerpt,
-    content,
-    "author": author->name,
-    "category": category->title,
+    publishedAt,
     coverImage {
-      asset -> {
-        url
-      }
-    }
+      url
+    },
+    author->{
+      name
+    },
+    content
   }
-`
+`;
 
-export default async function BlogPostDetailPage({ params }: Props) {
-  const post = await sanityClient.fetch(query, { slug: params.slug })
+export default async function BlogPostDetailPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const post: BlogPost | null = await client.fetch(query, {
+    slug: params.slug,
+  });
 
-  if (!post) return notFound()
+  if (!post) return notFound();
 
   return (
     <main className="text-white px-4 py-12 max-w-3xl mx-auto">
-      {/* Trigger centralized notification */}
-      <NotificationTrigger title={post.title} slug={params.slug} />
+      <UserActivityTracker />
 
-      {/* Cover image */}
-      {post.coverImage?.asset?.url && (
+      {post.coverImage?.url && (
         <Image
-          src={post.coverImage.asset.url}
+          src={post.coverImage.url}
           alt={post.title}
-          width={1200}
+          width={1020}
           height={600}
           className="w-full rounded-lg mb-6"
         />
       )}
 
-      {/* Title & metadata */}
-      <h1 className="text-3xl font-bold text-animekey-green mb-2">{post.title}</h1>
-      <p className="text-sm text-gray-400 mb-6">
-        By {post.author} — {new Date(post.publishedAt).toLocaleDateString()}
+      <h1 className="text-4xl font-bold text-animekey-green mb-2">{post.title}</h1>
+      <p className="text-sm text-gray-400">
+        By {post.author.name} | {new Date(post.publishedAt).toLocaleDateString()}
       </p>
 
-      {/* Content body */}
-      <div className="prose prose-invert max-w-none">
-        <PortableText value={post.content} />
-      </div>
+      {/* Add PortableText here if needed */}
     </main>
-  )
+  );
 }

@@ -1,28 +1,23 @@
-'use client'
+// frontend/lib/notify.ts
 
 import { logNotification } from './notifications'
 
-// Blog Posts
-export function notifyBlogPost(title: string, slug: string) {
-  logNotification('blog', `📝 ${title}`, `/blog/${slug}`, '📝')
-}
+export const notifyBlogPost = (message: string, url: string) => {
+  logNotification('blog', message, url);
+};
 
-// Lore Entries
-export function notifyLorePost(title: string, slug: string) {
-  logNotification('lore', `📜 ${title}`, `/lore/${slug}`, '📜')
-}
+export const notifyEvent = (message: string, url: string) => {
+  logNotification('event', message, url);
+};
 
-// Creator Spotlight
-export function notifySpotlight(title: string, slug: string) {
-  logNotification('spotlight', `🎤 ${title}`, `/spotlight/${slug}`, '🎤')
-}
+export const notifyLore = (message: string, url: string) => {
+  logNotification('lore', message, url);
+};
 
-// Events
-export function notifyEvent(title: string) {
-  logNotification('event', `🎉 A new event has just been published: ${title}`, `/events`, '🎉')
-}
+export const notifySpotlight = (message: string, url: string) => {
+  logNotification('spotlight', message, url);
+};
 
-// Community Posts
-export function notifyCommunityPost(title: string, slug: string) {
-  logNotification('community', `💬 ${title}`, `/community/${slug}`, '💬')
-}
+export const notifyCommunityPost = (message: string, url: string) => {
+  logNotification('community', message, url);
+};

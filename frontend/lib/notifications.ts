@@ -1,34 +1,35 @@
-type NotificationEntry = {
-  id: string
-  type: string
-  message: string
-  url: string
-  timestamp: string
-  read: boolean
-  icon?: string
-}
+// frontend/lib/notifications.ts
 
-let notifications: NotificationEntry[] = []
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  url: string;
+  timestamp: string;
+  read: boolean;
+  icon: string;
+}
 
 export function logNotification(
   type: string,
   message: string,
   url: string,
-  icon: string = '🔔'
-) {
-  const entry: NotificationEntry = {
+  icon = '🔔'
+): void {
+  const notification: Notification = {
     id: Date.now().toString(),
     type,
     message,
     url,
     timestamp: new Date().toLocaleString(),
     read: false,
-    icon,
-  }
+    icon
+  };
 
-  notifications.unshift(entry)
+  const existing = JSON.parse(localStorage.getItem('animekey-notifications') || '[]');
+  localStorage.setItem('animekey-notifications', JSON.stringify([notification, ...existing]));
 }
 
-export function getNotifications() {
-  return notifications
+export function getNotifications(): Notification[] {
+  return JSON.parse(localStorage.getItem('animekey-notifications') || '[]');
 }

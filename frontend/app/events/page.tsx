@@ -1,27 +1,30 @@
-import { getEvents } from '@/lib/queries'
-import EventCard from '@/components/EventCard'
-import ClientNotificationTrigger from '@/components/ClientNotificationTrigger'
+import React from 'react';
+import { groq } from 'next-sanity';
+import { client } from '../../lib/sanity.client';
+import EventsClientView from '../../components/EventsClientView';
+import UserActivityTracker from '../../components/UserActivityTracker';
+import type { EventPost } from '../../lib/types';
+
+export const revalidate = 60; // ISR every 60 seconds
+
+const query = groq`*[_type == "eventPost"] | order(date desc){
+  _id,
+  title,
+  slug,
+  date,
+  description
+}`;
 
 export default async function EventsPage() {
-  const events = await getEvents()
+  const events: EventPost[] = await client.fetch(query);
 
   return (
-    <main className="text-white px-4 md:px-8 py-12">
-      <h1 className="text-2xl font-bold text-animekey-green mb-4">Events</h1>
-      <p className="text-sm text-gray-400 mb-8">
-        Check out the latest AnimeKey events, appearances, and meetups.
-      </p>
-
-      <ClientNotificationTrigger
-        title={events[0]?.title || 'New Event'}
-        slug={events[0]?.slug?.current || ''}
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event: any) => (
-          <EventCard key={event._id} event={event} />
-        ))}
-      </div>
-    </main>
-  )
+    <>
+      <UserActivityTracker />
+      <section className="px-6 md:px-12 lg:px-24 py-10">
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 text-animekey-green">Upcoming Events</h1>
+        <EventsClientView posts={events} />
+      </section>
+    </>
+  );
 }

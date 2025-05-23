@@ -2,20 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    font-family: 'D-DIN', sans-serif;
-    background-color: #0f0f0f; /* Ashy black */
-    color: white;
-  }
-}
-
+/* Font Declaration */
 @font-face {
   font-family: 'D-DIN';
   src: url('/fonts/D-DIN.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
+
+/* Base Styling Layer */
+@layer base {
+  html {
+    font-family: 'D-DIN', sans-serif;
+    background-color: #0f0f0f; /* Ashy black */
+    color: white;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-white antialiased;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #7EFFB2; /* AnimeKey Green */
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* Utility Animations */
 @layer utilities {
   .animate-enter {
     animation: fadeInUp 0.4s ease-out forwards;
@@ -47,6 +71,7 @@
     }
   }
 }
+
 /* Manga-style speech bubble tail */
 .speech-bubble {
   position: relative;

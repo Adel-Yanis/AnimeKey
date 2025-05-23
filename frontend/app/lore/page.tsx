@@ -1,9 +1,13 @@
-import { getLorePosts } from '@/lib/queries'
-import LoreCard from '@/components/LoreCard'
-import ClientNotificationTrigger from '@/components/ClientNotificationTrigger'
+// frontend/app/lore/page.tsx
+
+import { getAllLoreEntries } from "../../lib/queries";
+import { sanityClient } from "../../lib/sanity.client";
+import LoreCard from "../../components/LoreCard";
+import UserActivityTracker from "../../components/UserActivityTracker";
+import type { LoreEntry } from "../../lib/types";
 
 export default async function LorePage() {
-  const loreItems = await getLorePosts()
+  const loreItems: LoreEntry[] = await sanityClient.fetch(getAllLoreEntries);
 
   return (
     <main className="text-white px-4 md:px-8 py-12">
@@ -12,16 +16,14 @@ export default async function LorePage() {
         Explore deep dives into anime worlds, characters, and timelines.
       </p>
 
-      <ClientNotificationTrigger
-        title={loreItems[0]?.title || 'New Lore Entry'}
-        slug={loreItems[0]?.slug?.current || ''}
-      />
+      {/* 🔵 Activity Tracking */}
+      <UserActivityTracker />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loreItems.map((lore: any) => (
-          <LoreCard key={lore._id} lore={lore} />
+        {loreItems.map((lore) => (
+          <LoreCard key={lore._id} post={lore} />
         ))}
       </div>
     </main>
-  )
+  );
 }

@@ -1,49 +1,45 @@
 // frontend/app/post/[slug]/page.tsx
-import { groq } from 'next-sanity'
-import { sanityClient } from '@/lib/sanity.client'
-import Image from 'next/image'
-import { PortableText } from '@portabletext/react'
-import { notFound } from 'next/navigation'
+import { fetchBlogPostBySlug } from "../../../lib/queries";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { PortableText } from "@portabletext/react";
+import type { PortableTextBlock } from "sanity";
+import UserActivityTracker from "../../../components/UserActivityTracker";
+import type { BlogPost } from "../../../lib/types";
 
 type Params = {
   params: {
-    slug: string
-  }
-}
-
-const query = groq`
-  *[_type == "blogPost" && slug.current == $slug][0]{
-    _id,
-    title,
-    slug,
-    publishedAt,
-    mainImage {
-      asset-> {
-        url
-      }
-    },
-    excerpt,
-    body,
-    "author": author->name,
-    "category": category->title
-  }
-`
+    slug: string;
+  };
+};
 
 export default async function PostPage({ params }: Params) {
-  const post = await sanityClient.fetch(query, { slug: params.slug })
-
-  if (!post) return notFound()
+  const post: BlogPost | null = await fetchBlogPostBySlug(params.slug);
+  if (!post) return notFound();
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 text-white">
+      {/* 📊 Activity Tracking */}
+      <UserActivityTracker />
+
+      {/* 📝 Title & Meta */}
       <h1 className="text-3xl font-bold text-animekey-green mb-2">{post.title}</h1>
       <p className="text-sm text-gray-400 mb-4">
-        {new Date(post.publishedAt).toLocaleDateString()} · By {post.author} · Category: {post.category}
+        {new Date(post.publishedAt).toLocaleDateString()} ·{" "}
+        <span className="underline cursor-pointer">{post.author?.name}</span>
+        {post.category?.title && (
+          <>
+            {" "}
+            · Category:{" "}
+            <span className="underline cursor-pointer">{post.category.title}</span>
+          </>
+        )}
       </p>
 
-      {post.mainImage?.asset?.url && (
+      {/* 🖼️ Cover Image */}
+      {post.coverImage?.url && (
         <Image
-          src={post.mainImage.asset.url}
+          src={post.coverImage.url}
           alt={post.title}
           width={1200}
           height={600}
@@ -51,9 +47,18 @@ export default async function PostPage({ params }: Params) {
         />
       )}
 
+      {/* 📚 Article Body */}
       <div className="prose prose-invert max-w-none">
-        <PortableText value={post.body as import('@portabletext/types').TypedObject[]} />
+        <PortableText value={post.content as PortableTextBlock[]} />
       </div>
     </article>
-  )
+  );
 }
+
+// Optional SEO metadata if needed later
+// export async function generateMetadata({ params }: Params) {
+//   const post = await fetchBlogPostBySlug(params.slug);
+//   return post
+//     ? { title: post.title, description: post.excerpt }
+//     : { title: "Blog Post", description: "Read more posts on AnimeKey" };
+// }

@@ -1,17 +1,38 @@
-'use client'
+// frontend/components/NotificationTrigger.tsx
 
-import { useEffect } from 'react'
-import { notifyBlogPost } from '@/lib/notify'
+'use client';
+
+import { useEffect } from 'react';
+import { notifyBlogPost, notifyEvent, notifyLore, notifySpotlight, notifyCommunityPost } from '../lib/notify';
 
 type NotificationTriggerProps = {
-  title: string
-  slug: string
-}
+  type: 'blog' | 'event' | 'lore' | 'spotlight' | 'community';
+  message: string;
+  url: string;
+};
 
-export default function NotificationTrigger({ title, slug }: NotificationTriggerProps) {
+export default function NotificationTrigger({ type, message, url }: NotificationTriggerProps) {
   useEffect(() => {
-    notifyBlogPost(title, slug)
-  }, [title, slug])
+    switch (type) {
+      case 'blog':
+        notifyBlogPost(message, url);
+        break;
+      case 'event':
+        notifyEvent(message, url);
+        break;
+      case 'lore':
+        notifyLore(message, url);
+        break;
+      case 'spotlight':
+        notifySpotlight(message, url);
+        break;
+      case 'community':
+        notifyCommunityPost(message, url);
+        break;
+      default:
+        console.warn('Unknown notification type:', type);
+    }
+  }, [type, message, url]);
 
-  return null
+  return null;
 }
