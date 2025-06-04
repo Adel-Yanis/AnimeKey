@@ -1,5 +1,6 @@
-import { groq } from "next-sanity";
-import { sanityClient } from "./sanity.client";
+import { groq } from 'next-sanity';
+import { sanityClient } from './sanity.client';
+import type { SearchResult } from './types';
 
 //
 // ─── BLOG QUERIES ──────────────────────────────────────────────────────────────
@@ -11,11 +12,9 @@ export const getAllBlogPosts = groq`
     slug,
     excerpt,
     publishedAt,
-    coverImage {
-      asset-> { url }
-    },
-    author-> { name },
-    category-> { title, slug }
+    coverImage { asset->{ url } },
+    author->{ name },
+    category->{ title, slug }
   }
 `;
 
@@ -27,21 +26,121 @@ export const getBlogPostBySlug = groq`
     excerpt,
     content,
     publishedAt,
-    coverImage {
-      asset-> { url }
-    },
-    author-> { name },
-    category-> { title, slug }
+    coverImage { asset->{ url } },
+    author->{ name },
+    category->{ title, slug }
   }
 `;
 
-export const fetchAllBlogPosts = async () => {
-  return await sanityClient.fetch(getAllBlogPosts);
-};
+export const getRelatedBlogPosts = groq`
+  *[_type == "blogPost" && category->slug.current == $categorySlug && _id != $excludeId][0...3] {
+    _id,
+    title,
+    slug,
+    excerpt,
+    publishedAt,
+    coverImage { asset->{ url } },
+    author->{ name },
+    category->{ title, slug }
+  }
+`;
 
-export const fetchBlogPostBySlug = async (slug: string) => {
-  return await sanityClient.fetch(getBlogPostBySlug, { slug });
-};
+export const fetchAllBlogPosts = async () => sanityClient.fetch(getAllBlogPosts);
+export const fetchBlogPostBySlug = async (slug: string) =>
+  sanityClient.fetch(getBlogPostBySlug, { slug });
+export const fetchRelatedBlogPosts = async (categorySlug: string, excludeId: string) =>
+  sanityClient.fetch(getRelatedBlogPosts, { categorySlug, excludeId });
+
+
+//
+// ─── LORE QUERIES ──────────────────────────────────────────────────────────────
+//
+export const getAllLoreEntries = groq`
+  *[_type == "lore"] | order(_createdAt desc) {
+    _id,
+    title,
+    slug,
+    category,
+    summary,
+    series->{ title, slug },
+    image { asset->{ url } },
+    body
+  }
+`;
+
+export const getLoreBySlug = groq`
+  *[_type == "lore" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    category,
+    summary,
+    series->{ title, slug },
+    image { asset->{ url } },
+    body
+  }
+`;
+
+export const getRelatedLoreByCategory = groq`
+  *[_type == "lore" && category == $category && _id != $excludeId][0...3] {
+    _id,
+    title,
+    slug,
+    category,
+    summary,
+    series->{ title, slug },
+    image { asset->{ url } },
+    body
+  }
+`;
+
+export const fetchAllLoreEntries = async () => sanityClient.fetch(getAllLoreEntries);
+export const fetchLoreBySlug = async (slug: string) => sanityClient.fetch(getLoreBySlug, { slug });
+export const fetchRelatedLoreByCategory = async (category: string, excludeId: string) =>
+  sanityClient.fetch(getRelatedLoreByCategory, { category, excludeId });
+
+
+//
+// ─── SPOTLIGHT QUERIES ─────────────────────────────────────────────────────────
+//
+export const getAllSpotlights = groq`
+  *[_type == "spotlight"] | order(_createdAt desc) {
+    _id,
+    name,
+    slug,
+    bio,
+    image { asset->{ url } },
+    featureBody
+  }
+`;
+
+export const getSpotlightBySlug = groq`
+  *[_type == "spotlight" && slug.current == $slug][0] {
+    _id,
+    name,
+    slug,
+    bio,
+    image { asset->{ url } },
+    featureBody
+  }
+`;
+
+export const getRelatedSpotlights = groq`
+  *[_type == "spotlight" && _id != $excludeId][0...3] {
+    _id,
+    name,
+    slug,
+    bio,
+    image { asset->{ url } },
+    featureBody
+  }
+`;
+
+export const fetchAllSpotlights = async () => sanityClient.fetch(getAllSpotlights);
+export const fetchSpotlightBySlug = async (slug: string) =>
+  sanityClient.fetch(getSpotlightBySlug, { slug });
+export const fetchRelatedSpotlights = async (excludeId: string) =>
+  sanityClient.fetch(getRelatedSpotlights, { excludeId });
 
 
 //
@@ -69,59 +168,9 @@ export const getCommunityPostBySlug = groq`
   }
 `;
 
-export const fetchCommunityPosts = async () => {
-  return await sanityClient.fetch(getCommunityPosts);
-};
-
-export const fetchCommunityPostBySlug = async (slug: string) => {
-  return await sanityClient.fetch(getCommunityPostBySlug, { slug });
-};
-
-
-//
-// ─── LORE QUERIES ──────────────────────────────────────────────────────────────
-//
-export const getAllLoreEntries = groq`
-  *[_type == "lore"] | order(_createdAt desc) {
-    _id,
-    title,
-    slug,
-    category,
-    series-> {
-      title,
-      slug
-    },
-    image {
-      asset-> { url }
-    },
-    body
-  }
-`;
-
-export const getLoreBySlug = groq`
-  *[_type == "lore" && slug.current == $slug][0] {
-    _id,
-    title,
-    slug,
-    category,
-    series-> {
-      title,
-      slug
-    },
-    image {
-      asset-> { url }
-    },
-    body
-  }
-`;
-
-export const fetchAllLoreEntries = async () => {
-  return await sanityClient.fetch(getAllLoreEntries);
-};
-
-export const fetchLoreBySlug = async (slug: string) => {
-  return await sanityClient.fetch(getLoreBySlug, { slug });
-};
+export const fetchCommunityPosts = async () => sanityClient.fetch(getCommunityPosts);
+export const fetchCommunityPostBySlug = async (slug: string) =>
+  sanityClient.fetch(getCommunityPostBySlug, { slug });
 
 
 //
@@ -135,9 +184,7 @@ export const getAllEvents = groq`
     date,
     location,
     ticketUrl,
-    mainImage {
-      asset-> { url }
-    },
+    image: mainImage { asset->{ url } },
     body
   }
 `;
@@ -150,73 +197,97 @@ export const getEventBySlug = groq`
     date,
     location,
     ticketUrl,
-    mainImage {
-      asset-> { url }
-    },
+    image: mainImage { asset->{ url } },
     body
   }
 `;
 
-export const fetchAllEvents = async () => {
-  return await sanityClient.fetch(getAllEvents);
-};
-
-export const fetchEventBySlug = async (slug: string) => {
-  return await sanityClient.fetch(getEventBySlug, { slug });
-};
+export const fetchAllEvents = async () => sanityClient.fetch(getAllEvents);
+export const fetchEventBySlug = async (slug: string) => sanityClient.fetch(getEventBySlug, { slug });
 
 
 //
-// ─── SPOTLIGHT QUERIES ─────────────────────────────────────────────────────────
+// ─── CATEGORY QUERIES ─────────────────────────────────────────────────────────
 //
-export const getAllSpotlights = groq`
-  *[_type == "spotlight"] | order(_createdAt desc) {
-    _id,
-    name,
-    slug,
-    bio,
-    image {
-      asset-> { url }
-    },
-    featureBody
+export const getAllCategories = groq`
+  *[_type == "category"] | order(title asc) {
+    title,
+    slug
   }
 `;
 
-export const getSpotlightBySlug = groq`
-  *[_type == "spotlight" && slug.current == $slug][0] {
-    _id,
-    name,
-    slug,
-    bio,
-    image {
-      asset-> { url }
-    },
-    featureBody
-  }
-`;
-
-export const fetchAllSpotlights = async () => {
-  return await sanityClient.fetch(getAllSpotlights);
-};
-
-export const fetchSpotlightBySlug = async (slug: string) => {
-  return await sanityClient.fetch(getSpotlightBySlug, { slug });
-};
+export const fetchAllCategories = async () =>
+  sanityClient.fetch(getAllCategories);
 
 
 //
-// ─── HOMEPAGE CONTENT BATCH ─────────────────────────────────────────────────────
+// ─── UNIFIED SEARCH RESULTS ────────────────────────────────────────────────────
 //
-export const getHomepageContent = groq`
-{
-  "topBlogs": *[_type == "blogPost"] | order(publishedAt desc)[0...3],
-  "latestLore": *[_type == "lore"] | order(_createdAt desc)[0...3],
-  "recentSpotlights": *[_type == "spotlight"] | order(_createdAt desc)[0...2],
-  "upcomingEvent": *[_type == "event" && date > now()] | order(date asc)[0],
-  "communityBuzz": *[_type == "communityPost"] | order(_createdAt desc)[0...2]
-}
+export const getUnifiedSearchResults = groq`
+  [
+    ...*[_type == "blogPost"]{ _id, title, slug, type: "blogPost", category->{ title, slug }, excerpt, coverImage { asset->{ url } }, author->{ name }, publishedAt },
+    ...*[_type == "lore"]{ _id, title, slug, type: "lore", category, summary, image{ asset->{ url } } },
+    ...*[_type == "spotlight"]{ _id, name, slug, type: "spotlight", bio, image{ asset->{ url } } },
+    ...*[_type == "communityPost"]{ _id, title, slug, type: "communityPost", username, body }
+  ]
 `;
 
-export const fetchHomepageContent = async () => {
-  return await sanityClient.fetch(getHomepageContent);
+
+//
+// ─── SEARCH SUGGESTIONS ────────────────────────────────────────────────────────
+//
+export const fetchSearchResults = async (
+  query: string
+): Promise<SearchResult[]> => {
+  const sanitized = `${query}*`; // Sanity requires wildcard suffix for match
+  return sanityClient.fetch<SearchResult[]>(
+    groq`
+      *[
+        _type in ["blogPost", "lore", "spotlight", "communityPost"] &&
+        (
+          (defined(title) && title match $query) ||
+          (defined(name) && name match $query) ||
+          (defined(summary) && summary match $query) ||
+          (defined(bio) && bio match $query) ||
+          (defined(username) && username match $query)
+        )
+      ][0...5] {
+        _id,
+        _type,
+        _type as type,
+        title: coalesce(title, name),
+        name,
+        slug,
+        excerpt,
+        summary,
+        bio,
+        coverImage {
+          asset->{ url }
+        },
+        image {
+          asset->{ url }
+        },
+        mainImage {
+          asset->{ url }
+        },
+        category -> {
+          title,
+          slug
+        },
+        author -> {
+          name
+        },
+        username,
+        featureBody,
+        body,
+        ticketUrl,
+        location,
+        date
+      }
+    `,
+    { query: sanitized } as Record<string, string>
+  );
 };
+
+
+

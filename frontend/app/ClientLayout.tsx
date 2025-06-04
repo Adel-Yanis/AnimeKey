@@ -1,13 +1,12 @@
-'use client'
+'use client';
 
-import { Toaster } from 'react-hot-toast'
-import Sidebar from '../components/Sidebar'
+import { Toaster } from 'react-hot-toast';
+import Sidebar from '../components/Sidebar';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar />
-
       <div className="flex-1 overflow-x-hidden">
         <Toaster
           position="top-right"
@@ -25,5 +24,5 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {children}
       </div>
     </div>
-  )
+  );
 }

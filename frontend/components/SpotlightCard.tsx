@@ -1,36 +1,42 @@
-// frontend/components/SpotlightCard.tsx
 'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { SpotlightEntry } from '../lib/types';
+import type { PortableTextBlock } from 'sanity';
 
-type SpotlightCardProps = {
-  spotlight: {
-    name: string;
-    slug: { current: string };
-    image: { asset: { url: string } };
-    bio: string;
-  };
-};
+export default function SpotlightCard({ post }: { post: SpotlightEntry }) {
+  let previewText = post.bio || 'Learn more about this creator...';
 
-export default function SpotlightCard({ spotlight }: SpotlightCardProps) {
+  // Optional fallback if needed
+  if (!post.bio && Array.isArray(post.featureBody)) {
+    const firstBlock = post.featureBody[0] as PortableTextBlock;
+    if (
+      firstBlock &&
+      firstBlock._type === 'block' &&
+      Array.isArray(firstBlock.children) &&
+      firstBlock.children[0]?._type === 'span'
+    ) {
+      previewText = firstBlock.children[0].text;
+    }
+  }
+
   return (
-    <Link href={`/spotlight/${spotlight.slug.current}`}>
-      <div className="bg-zinc-900 border border-animekey-green rounded-lg overflow-hidden hover:shadow-lg transition">
-        {spotlight.image.asset.url && (
-          <Image
-            src={spotlight.image.asset.url}
-            alt={spotlight.name}
-            width={400}
-            height={400}
-            className="w-full h-48 object-cover"
-          />
+    <Link href={`/spotlight/${post.slug.current}`}>
+      <div className="border border-animekey-green p-4 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+        {post.image?.asset?.url && (
+          <div className="relative w-full h-48 mb-3">
+            <Image
+              src={post.image.asset.url}
+              alt={post.name}
+              fill
+              className="rounded object-cover"
+            />
+          </div>
         )}
-
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-white">{spotlight.name}</h3>
-          <p className="text-sm text-gray-400">{spotlight.bio}</p>
-        </div>
+        <p className="text-xs text-animekey-green mb-1">Spotlight</p>
+        <h3 className="text-base font-bold text-white">{post.name}</h3>
+        <p className="text-sm text-gray-400 line-clamp-2 mt-1">{previewText}</p>
       </div>
     </Link>
   );

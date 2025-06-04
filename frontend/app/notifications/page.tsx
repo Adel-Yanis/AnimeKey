@@ -1,12 +1,18 @@
-// frontend/app/notifications/page.tsx
-"use client";
+'use client';
 
-import NotificationCard from "../../components/NotificationCard";
-import { getNotifications } from "../../lib/notifications";
-import type { Notification } from "../../lib/types";
+import { useEffect, useState } from 'react';
+import NotificationCard from '../../components/NotificationCard';
+import { getSystemNotifications, markAllAsRead } from '../../lib/notifications';
+import type { Notification } from '../../lib/types';
 
 export default function NotificationsPage() {
-  const notifications = getNotifications();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    const systemNotifs = getSystemNotifications();
+    setNotifications(systemNotifs);
+    markAllAsRead(); // only marks system notifications as read
+  }, []);
 
   return (
     <div className="p-6">
@@ -16,7 +22,7 @@ export default function NotificationsPage() {
         <p className="text-sm text-gray-400">You have no notifications yet.</p>
       ) : (
         <div className="space-y-4">
-          {notifications.map((notification: Notification) => (
+          {notifications.map((notification) => (
             <NotificationCard key={notification.id} {...notification} />
           ))}
         </div>

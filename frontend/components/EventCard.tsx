@@ -1,40 +1,33 @@
-// frontend/components/EventCard.tsx
-'use client'
+'use client';
 
-import Link from 'next/link'
-import Image from 'next/image'
-
-type EventPost = {
-  title: string
-  slug: {
-    current: string
-  }
-  coverImage?: {
-    asset: {
-      url: string
-    }
-  }
-  date: string
-}
+import Link from 'next/link';
+import Image from 'next/image';
+import type { EventPost } from '../lib/types';
 
 export default function EventCard({ post }: { post: EventPost }) {
   return (
     <Link href={`/events/${post.slug.current}`}>
-      <div className="bg-zinc-900 border border-animekey-green rounded-lg overflow-hidden hover:shadow-lg transition">
-        {post.coverImage?.asset?.url && (
-          <Image
-            src={post.coverImage.asset.url}
-            alt={post.title}
-            width={800}
-            height={400}
-            className="w-full h-auto"
-          />
-        )}
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-white mb-1">{post.title}</h3>
-          <p className="text-sm text-gray-400">Date: {post.date}</p>
+      <div className="border border-animekey-green p-4 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+        <div className="text-xs text-animekey-green mb-1">
+          {new Date(post.date).toLocaleString()}
         </div>
+
+        <h3 className="text-lg font-bold text-white mb-2">{post.title}</h3>
+
+        {post.image?.asset?.url && (
+          <div className="relative w-full h-48 mb-2">
+            <Image
+              src={post.image.asset.url}
+              alt={post.title}
+              fill
+              className="object-cover rounded"
+              sizes="(max-width: 768px) 100vw, 700px"
+            />
+          </div>
+        )}
+
+        <p className="text-sm text-gray-400 line-clamp-2">{post.location}</p>
       </div>
     </Link>
-  )
+  );
 }

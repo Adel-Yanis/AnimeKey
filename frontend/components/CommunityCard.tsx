@@ -1,29 +1,15 @@
-// frontend/components/CommunityCard.tsx
-'use client'
-
-import Link from 'next/link'
-
-type CommunityPost = {
-  title: string
-  slug: {
-    current: string
-  }
-  username: string
-  type: string
-}
+import Link from 'next/link';
+import { CommunityPost } from '../lib/types';
 
 export default function CommunityCard({ post }: { post: CommunityPost }) {
+  if (!post._id) return null;
+
   return (
-    <Link href={`/community/${post.slug.current}`}>
-      <div className="bg-zinc-900 border border-animekey-green rounded-lg overflow-hidden hover:shadow-lg transition">
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-white mb-1">{post.title}</h3>
-          <p className="text-sm text-gray-400 mb-2">By: {post.username}</p>
-          <span className="text-xs text-animekey-green uppercase tracking-wide">
-            {post.type}
-          </span>
-        </div>
+    <Link href={`/community/${post._id}`}>
+      <div className="cursor-pointer border border-gray-700 p-4 rounded hover:bg-gray-800 transition">
+        <p className="text-xs text-animekey-green mb-1">{post.type}</p>
+        <h3 className="text-base font-bold text-white">{post.title}</h3>
       </div>
     </Link>
-  )
+  );
 }

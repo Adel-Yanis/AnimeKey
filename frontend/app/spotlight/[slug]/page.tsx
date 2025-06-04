@@ -1,9 +1,9 @@
-// frontend/app/spotlight/[slug]/page.tsx
-import { fetchSpotlightBySlug } from "../../../lib/queries";
+import { fetchSpotlightBySlug, fetchRelatedSpotlights } from "../../../lib/queries";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { SpotlightEntry } from "../../../lib/types";
+import RelatedPosts from "../../../components/RelatedPosts";
 
 type Params = {
   params: {
@@ -13,12 +13,12 @@ type Params = {
 
 export default async function SpotlightDetailPage({ params }: Params) {
   const spotlight: SpotlightEntry | null = await fetchSpotlightBySlug(params.slug);
-
   if (!spotlight) return notFound();
+
+  const related = await fetchRelatedSpotlights(spotlight._id);
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 text-white">
-      {/* 🖼️ Cover Image */}
       {spotlight.image?.asset?.url && (
         <Image
           src={spotlight.image.asset.url}
@@ -29,14 +29,14 @@ export default async function SpotlightDetailPage({ params }: Params) {
         />
       )}
 
-      {/* 📝 Title & Bio */}
       <h1 className="text-3xl font-bold text-animekey-green mb-2">{spotlight.name}</h1>
       <p className="text-sm text-gray-400 mb-6">{spotlight.bio}</p>
 
-      {/* 🧠 Spotlight Body */}
-      <div className="prose prose-invert max-w-none">
+      <div className="prose prose-invert max-w-none mb-12">
         <PortableText value={spotlight.featureBody} />
       </div>
+
+      <RelatedPosts posts={related} />
     </article>
   );
 }

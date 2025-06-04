@@ -1,12 +1,11 @@
-// app/blog/[slug]/page.tsx
-import React from 'react';
 import { groq } from 'next-sanity';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-
 import { client } from '../../../lib/sanity.client';
 import { BlogPost } from '../../../lib/types';
 import UserActivityTracker from '../../../components/UserActivityTracker';
+import RelatedPosts from '../../../components/RelatedPosts';
+import { fetchRelatedBlogPosts } from '../../../lib/queries';
 
 const query = groq`
   *[_type == "blogPost" && slug.current == $slug][0] {
@@ -15,47 +14,48 @@ const query = groq`
     slug,
     excerpt,
     publishedAt,
-    coverImage {
-      url
-    },
-    author->{
-      name
-    },
-    content
+    content,
+    coverImage { asset->{ url } },
+    author->{ name },
+    category->{ title, slug }
   }
 `;
 
-export default async function BlogPostDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const post: BlogPost | null = await client.fetch(query, {
-    slug: params.slug,
-  });
+interface Params {
+  slug: string;
+}
+
+export default async function BlogPostDetailPage({ params }: { params: Params }) {
+  const post: BlogPost | null = await client.fetch(query, { slug: params.slug });
 
   if (!post) return notFound();
 
+  const categorySlug = post.category?.slug?.current || 'default';
+  const related = await fetchRelatedBlogPosts(categorySlug, post._id);
+
   return (
-    <main className="text-white px-4 py-12 max-w-3xl mx-auto">
+    <main className="px-6">
       <UserActivityTracker />
-
-      {post.coverImage?.url && (
-        <Image
-          src={post.coverImage.url}
-          alt={post.title}
-          width={1020}
-          height={600}
-          className="w-full rounded-lg mb-6"
-        />
-      )}
-
-      <h1 className="text-4xl font-bold text-animekey-green mb-2">{post.title}</h1>
-      <p className="text-sm text-gray-400">
-        By {post.author.name} | {new Date(post.publishedAt).toLocaleDateString()}
+      <h1 className="text-2xl font-bold text-animekey-green">{post.title}</h1>
+      <p className="text-sm text-gray-400 mt-1">
+        {new Date(post.publishedAt).toLocaleDateString()}
       </p>
 
-      {/* Add PortableText here if needed */}
+      {post.coverImage?.asset?.url && (
+        <div className="relative w-full h-96 my-4">
+          <Image
+            src={post.coverImage.asset.url}
+            alt={post.title}
+            fill
+            className="rounded object-cover"
+            sizes="(max-width: 768px) 100vw, 800px"
+          />
+        </div>
+      )}
+
+      {/* Optional content rendering here */}
+
+      <RelatedPosts posts={related} />
     </main>
   );
 }

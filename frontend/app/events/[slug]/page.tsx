@@ -1,62 +1,49 @@
+import { fetchEventBySlug } from '../../../lib/queries';
 import { PortableText } from '@portabletext/react';
+import type { EventPost } from '../../../lib/types';
 import Image from 'next/image';
-import { client } from '../../../lib/sanity.client';
-import type { PortableTextBlock } from 'sanity';
 
-type EventDetail = {
-  title: string;
-  date: string;
-  location: string;
-  ticketUrl?: string;
-  mainImage: { asset: { url: string } };
-  body: PortableTextBlock[];
-};
-
-async function getEvent(slug: string): Promise<EventDetail> {
-  const query = `*[_type == "event" && slug.current == $slug][0]{
-    title,
-    date,
-    location,
-    ticketUrl,
-    mainImage { asset->{url} },
-    body
-  }`;
-  return await client.fetch(query, { slug });
+interface Params {
+  slug: string;
 }
 
-export default async function EventDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const event = await getEvent(params.slug);
+export default async function EventDetailPage({ params }: { params: Params }) {
+  const event: EventPost = await fetchEventBySlug(params.slug);
+
+  if (!event) {
+    return <div className="text-white p-8">Event not found</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-white">
-      <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-      <p className="text-sm text-gray-400 mb-4">
-        {new Date(event.date).toLocaleString()} — {event.location}
+    <main className="p-6">
+      <h1 className="text-2xl font-bold text-animekey-green">{event.title}</h1>
+      <p className="text-sm text-gray-400 mt-1">
+        {new Date(event.date).toLocaleString()}
       </p>
 
-      {event.ticketUrl && (
-        <a href={event.ticketUrl} target="_blank" rel="noreferrer">
-          <button className="mb-4 px-4 py-2 bg-animekey-green text-black rounded hover:brightness-110">
-            Buy Ticket
-          </button>
-        </a>
+      {event.image?.asset?.url && (
+        <div className="relative w-full h-96 my-4">
+          <Image
+            src={event.image.asset.url}
+            alt={event.title}
+            fill
+            className="rounded object-cover"
+            sizes="(max-width: 768px) 100vw, 800px"
+          />
+        </div>
       )}
 
-      <Image
-        src={event.mainImage.asset.url}
-        alt={event.title}
-        width={1200}
-        height={400}
-        className="w-full h-72 object-cover rounded mb-4"
-      />
+      {event.ticketUrl && (
+        <p className="mt-2 text-animekey-green underline">
+          <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
+            Buy Tickets
+          </a>
+        </p>
+      )}
 
-      <div className="prose prose-invert">
+      <div className="mt-6 text-white">
         <PortableText value={event.body} />
       </div>
-    </div>
+    </main>
   );
 }

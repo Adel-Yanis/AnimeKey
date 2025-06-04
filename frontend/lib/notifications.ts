@@ -1,20 +1,20 @@
-// frontend/lib/notifications.ts
+import { Notification } from './types';
+import { saveToStorage, loadFromStorage } from './storage';
 
-interface Notification {
-  id: string;
-  type: string;
-  message: string;
-  url: string;
-  timestamp: string;
-  read: boolean;
-  icon: string;
-}
+const STORAGE_KEY = 'animekey-notifications';
 
+/**
+ * Logs a new notification entry to localStorage.
+ * @param type 'system' for CMS-triggered / alerts. 'activity' for user tracking (private).
+ * @param message Display message content.
+ * @param url Route to link when clicked.
+ * @param icon Optional emoji/icon string.
+ */
 export function logNotification(
-  type: string,
+  type: 'system' | 'activity',
   message: string,
   url: string,
-  icon = '🔔'
+  icon = '🟡'
 ): void {
   const notification: Notification = {
     id: Date.now().toString(),
@@ -26,10 +26,30 @@ export function logNotification(
     icon
   };
 
-  const existing = JSON.parse(localStorage.getItem('animekey-notifications') || '[]');
-  localStorage.setItem('animekey-notifications', JSON.stringify([notification, ...existing]));
+  const existing = getNotifications();
+  saveToStorage(STORAGE_KEY, [notification, ...existing]);
 }
 
+/**
+ * Retrieves all stored notifications.
+ */
 export function getNotifications(): Notification[] {
-  return JSON.parse(localStorage.getItem('animekey-notifications') || '[]');
+  return loadFromStorage<Notification[]>(STORAGE_KEY) || [];
+}
+
+/**
+ * Retrieves only system notifications (e.g. public alerts).
+ */
+export function getSystemNotifications(): Notification[] {
+  return getNotifications().filter(n => n.type === 'system');
+}
+
+/**
+ * Marks all system notifications as read.
+ */
+export function markAllAsRead(): void {
+  const updated = getNotifications().map(n =>
+    n.type === 'system' ? { ...n, read: true } : n
+  );
+  saveToStorage(STORAGE_KEY, updated);
 }

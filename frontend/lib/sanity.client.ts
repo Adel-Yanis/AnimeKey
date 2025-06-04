@@ -1,3 +1,4 @@
+// frontend/lib/sanity.client.ts
 import { createClient } from 'next-sanity';
 
 export const sanityClient = createClient({
@@ -6,3 +7,6 @@ export const sanityClient = createClient({
   apiVersion: '2023-12-01',
   useCdn: true,
 });
+
+// ✅ Named export as `client` for compatibility
+export { sanityClient as client };
